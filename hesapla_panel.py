@@ -16,8 +16,6 @@ BIRIM_KANAL = 5974.26
 BIRIM_KESIF = 2082.25
 
 # --- FONT AYARI (İnternet/Bulut Uyumlu) ---
-# Sunucularda Windows fontları (C:\Windows\Fonts) olmadığı için 
-# standart Helvetica fontlarını kullanıyoruz.
 FONT_NAME, FONT_NAME_BOLD = 'Helvetica', 'Helvetica-Bold'
 
 st.set_page_config(page_title="Katılım Bedelleri Hesaplama Sistemi", layout="wide")
@@ -94,4 +92,78 @@ if st.button("🚀 PDF Raporunu Oluştur"):
             kanal_satiri, kanal_t = satir_hazirla("Kanal", kanal_olcu, BIRIM_KANAL, kanal_oran_secim)
             kesif_t = kesif_adet * BIRIM_KESIF
             
-            kesif_
+            # Hatalı olan satır burada düzeltildi:
+            kesif_satiri = ["Keşif", f"{kesif_adet}", f"{BIRIM_KESIF:,.2f}", "-", f"{kesif_t:,.2f} TL"]
+            genel_toplam = su_t + kanal_t + kesif_t
+
+            packet = io.BytesIO()
+            can = canvas.Canvas(packet, pagesize=A4)
+            can.setFillColor(colors.white)
+            can.setStrokeColor(colors.white)
+            can.rect(420, 750, 150, 35, fill=1)
+            can.rect(50, 420, 550, 120, fill=1)
+
+            can.setFillColor(colors.black)
+            can.setFont(FONT_NAME_BOLD, 11)
+            can.drawString(80, 245, "HESAP TABLOSU")
+
+            data = [
+                ["Tahakkuk Kalemi", "Ölçü", "Birim Fiyat", "Oran", "Tutar"],
+                su_satiri, kanal_satiri, kesif_satiri,
+                ["TOPLAM", "", "", "", f"{genel_toplam:,.2f} TL"]
+            ]
+            
+            t = Table(data, colWidths=[110, 50, 90, 80, 90])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.whitesmoke),
+                ('GRID', (0, 0), (-1, -2), 0.5, colors.grey),
+                ('FONTNAME', (0, 0), (-1, -1), FONT_NAME), 
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'), 
+                ('ALIGN', (4, 1), (4, -1), 'RIGHT'),
+                ('SPAN', (0, -1), (3, -1)), 
+                ('ALIGN', (0, -1), (0, -1), 'RIGHT'),
+                ('BACKGROUND', (0, -1), (-1, -1), colors.lightgrey), 
+                ('FONTNAME', (0, -1), (-1, -1), FONT_NAME_BOLD),
+                ('GRID', (0, -1), (-1, -1), 0.5, colors.grey),
+            ]))
+            t.wrapOn(can, 450, 200)
+            t.drawOn(can, 80, 150)
+            
+            y_konum = 130
+            if su_aciklama:
+                can.setFont(FONT_NAME_BOLD, 11); can.setFillColor(colors.red)
+                can.drawString(80, y_konum, f"Not: {su_aciklama}"); y_konum -= 20
+            
+            if kanal_aciklama:
+                can.setFont(FONT_NAME, 9); can.setFillColor(colors.black)
+                from reportlab.lib.utils import simpleSplit
+                lines = simpleSplit(kanal_aciklama, FONT_NAME, 9, 450)
+                for line in lines:
+                    can.drawString(80, y_konum, line); y_konum -= 11
+
+            can.save()
+            packet.seek(0)
+            new_pdf = PdfReader(packet)
+            old_pdf = PdfReader(io.BytesIO(pdf_file_content))
+            output = PdfWriter()
+            for i in range(len(old_pdf.pages)):
+                page = old_pdf.pages[i]
+                if i == 0: page.merge_page(new_pdf.pages[0])
+                output.add_page(page)
+            
+            res_output = io.BytesIO()
+            output.write(res_output)
+            final_pdf_data = res_output.getvalue()
+
+            st.success("✅ Rapor başarıyla oluşturuldu!")
+            
+            base64_pdf = base64.b64encode(final_pdf_data).decode('utf-8')
+            pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="1000" type="application/pdf"></iframe>'
+            
+            st.download_button("📥 Bilgisayara Kaydet", final_pdf_data, "Katilim_Bedeli_Raporu.pdf")
+            st.markdown("---")
+            st.markdown(pdf_display, unsafe_allow_html=True)
+            
+        except Exception as e:
+            st.error(f"Sistem Hatası: {e}")
