@@ -13,10 +13,8 @@ from reportlab.pdfbase.ttfonts import TTFont
 # --- 1. TÜRKÇE FONT DESTEĞİ (Roboto Fontu) ---
 @st.cache_resource
 def turkce_font_hazirla():
-    # Türkçe karakterler için en güvenli font: Roboto
     font_url = "https://github.com/google/fonts/raw/main/apache/roboto/Roboto-Regular.ttf"
     font_bold_url = "https://github.com/google/fonts/raw/main/apache/roboto/Roboto-Bold.ttf"
-    
     try:
         f_reg = requests.get(font_url).content
         f_bold = requests.get(font_bold_url).content
@@ -88,4 +86,73 @@ with col2:
 
 st.markdown("**🔍 Keşif Bilgisi**")
 kesif_adet = st.number_input("Keşif Sayısı (Adet)", min_value=0, value=0, step=1, key="ke_a")
-st.markdown("**📝 Genel Notlar ve
+
+st.markdown("**📝 Genel Notlar ve Açıklama**")
+kanal_aciklama = st.text_area("Raporun altına eklenecek detaylı not:", height=100)
+
+# --- 6. ADIM: PDF OLUŞTURMA ---
+if st.button("🚀 PDF Raporunu Oluştur"):
+    if pdf_file_content:
+        try:
+            su_satiri, su_t = satir_hazirla("Su", su_olcu, BIRIM_SU, su_oran_secim)
+            kanal_satiri, kanal_t = satir_hazirla("Kanal", kanal_olcu, BIRIM_KANAL, kanal_oran_secim)
+            kesif_t = kesif_adet * BIRIM_KESIF
+            kesif_satiri = ["Keşif", f"{kesif_adet}", f"{BIRIM_KESIF:,.2f}", "-", f"{kesif_t:,.2f} TL"]
+            genel_toplam = su_t + kanal_t + kesif_t
+
+            packet = io.BytesIO()
+            can = canvas.Canvas(packet, pagesize=A4)
+            # Maskeleme
+            can.setFillColor(colors.white); can.setStrokeColor(colors.white)
+            can.rect(420, 750, 150, 35, fill=1); can.rect(50, 420, 550, 120, fill=1)
+
+            can.setFillColor(colors.black)
+            can.setFont(FONT_NAME_BOLD, 11)
+            can.drawString(80, 245, "HESAP TABLOSU")
+
+            data = [
+                ["Tahakkuk Kalemi", "Ölçü", "Birim Fiyat", "Oran", "Tutar"],
+                su_satiri, kanal_satiri, kesif_satiri,
+                ["TOPLAM", "", "", "", f"{genel_toplam:,.2f} TL"]
+            ]
+            
+            t = Table(data, colWidths=[110, 50, 90, 80, 90])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.whitesmoke),
+                ('GRID', (0, 0), (-1, -2), 0.5, colors.grey),
+                ('FONTNAME', (0, 0), (-1, -1), FONT_NAME), 
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'), 
+                ('SPAN', (0, -1), (3, -1)), 
+                ('BACKGROUND', (0, -1), (-1, -1), colors.lightgrey), 
+                ('FONTNAME', (0, -1), (-1, -1), FONT_NAME_BOLD),
+                ('GRID', (0, -1), (-1, -1), 0.5, colors.grey),
+            ]))
+            t.wrapOn(can, 450, 200); t.drawOn(can, 80, 150)
+            
+            y_konum = 130
+            if su_aciklama:
+                can.setFont(FONT_NAME_BOLD, 10); can.setFillColor(colors.red)
+                can.drawString(80, y_konum, f"* {su_aciklama}"); y_konum -= 15
+            
+            if kanal_aciklama:
+                can.setFont(FONT_NAME, 9); can.setFillColor(colors.black)
+                from reportlab.lib.utils import simpleSplit
+                lines = simpleSplit(kanal_aciklama, FONT_NAME, 9, 450)
+                for line in lines:
+                    can.drawString(80, y_konum, line); y_konum -= 11
+
+            can.save(); packet.seek(0)
+            new_pdf = PdfReader(packet); old_pdf = PdfReader(io.BytesIO(pdf_file_content))
+            output = PdfWriter()
+            for i in range(len(old_pdf.pages)):
+                page = old_pdf.pages[i]
+                if i == 0: page.merge_page(new_pdf.pages[0])
+                output.add_page(page)
+            
+            res_output = io.BytesIO()
+            output.write(res_output)
+            st.success("✅ Rapor Hazır!")
+            b64 = base64.b64encode(res_output.getvalue()).decode('utf-8')
+            st.markdown(f'<iframe src="data:application/pdf;base64,{b64}" width="100%" height="800" type="application/pdf"></iframe>', unsafe_allow_html=True)
+            st.download_button("📥 İndir", res_output.getvalue(), "Rapor.
