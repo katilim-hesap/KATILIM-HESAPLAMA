@@ -10,11 +10,10 @@ from reportlab.platypus import Table, TableStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-# --- 1. TÜRKÇE FONT DESTEĞİ (Fontu Kodun İçine Gömüyoruz) ---
-# Bu yöntem internet kesilse bile fontun çalışmasını sağlar.
+# --- 1. TÜRKÇE FONT DESTEĞİ (Roboto Fontu) ---
 @st.cache_resource
 def turkce_font_hazirla():
-    # Google Fonts'tan Roboto fontunu çekiyoruz (En güvenli Türkçe desteği)
+    # Türkçe karakterler için en güvenli font: Roboto
     font_url = "https://github.com/google/fonts/raw/main/apache/roboto/Roboto-Regular.ttf"
     font_bold_url = "https://github.com/google/fonts/raw/main/apache/roboto/Roboto-Bold.ttf"
     
@@ -76,10 +75,10 @@ oran_listesi = ["Seçiniz...", "%100", "%25", "Meskun", "Tarım Alanı", "Muaf",
 
 col1, col2 = st.columns(2)
 with col1:
-    su_olcu = st.number_input("Su Ölçü (m)", min_value=0.0, step=0.1, key="su_m")
+    su_olcu = st.number_input("Su Ölçü (m)", min_value=0.0, value=0.0, step=0.1, key="su_m")
     su_oran_secim = st.selectbox("Su Oranı", oran_listesi, key="su_o")
     su_aciklama = "SU ABONESİ OLAMAZ" if su_oran_secim in ["%25", "Tarım Alanı"] else ""
     if su_aciklama: st.markdown(f"**:red[{su_aciklama}]**")
 
 with col2:
-    kanal_olcu = st.number_input("Kanal Ölçü (m)", min_value=0.0
+    kanal_olcu = st.number_input("Kanal Ölçü (m)", min_value=0.0, value
