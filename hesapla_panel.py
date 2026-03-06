@@ -74,4 +74,6 @@ oran_listesi = ["Seçiniz...", "%100", "%25", "Meskun", "Tarım Alanı", "Muaf",
 col1, col2 = st.columns(2)
 with col1:
     st.markdown("**💧 Su Satırı**")
-    su_olcu = st.number_input("Su
+    su_olcu = st.number_input("Su Ölçü (m)", min_value=0.0, value=0.0, step=0.1, key="su_m")
+    su_oran_secim = st.selectbox("Su Oranı", oran_listesi, key="su_o")
+    su_aciklama = "SU ABONESİ OLAMAZ" if su_oran_secim in ["%2
