@@ -75,10 +75,17 @@ oran_listesi = ["Seçiniz...", "%100", "%25", "Meskun", "Tarım Alanı", "Muaf",
 
 col1, col2 = st.columns(2)
 with col1:
+    st.markdown("**💧 Su Satırı**")
     su_olcu = st.number_input("Su Ölçü (m)", min_value=0.0, value=0.0, step=0.1, key="su_m")
     su_oran_secim = st.selectbox("Su Oranı", oran_listesi, key="su_o")
     su_aciklama = "SU ABONESİ OLAMAZ" if su_oran_secim in ["%25", "Tarım Alanı"] else ""
     if su_aciklama: st.markdown(f"**:red[{su_aciklama}]**")
 
 with col2:
-    kanal_olcu = st.number_input("Kanal Ölçü (m)", min_value=0.0, value
+    st.markdown("**🚽 Kanal Satırı**")
+    kanal_olcu = st.number_input("Kanal Ölçü (m)", min_value=0.0, value=0.0, step=0.1, key="ka_m")
+    kanal_oran_secim = st.selectbox("Kanal Oranı", oran_listesi, key="ka_o")
+
+st.markdown("**🔍 Keşif Bilgisi**")
+kesif_adet = st.number_input("Keşif Sayısı (Adet)", min_value=0, value=0, step=1, key="ke_a")
+st.markdown("**📝 Genel Notlar ve
