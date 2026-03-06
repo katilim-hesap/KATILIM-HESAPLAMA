@@ -76,4 +76,9 @@ with col1:
     st.markdown("**💧 Su Satırı**")
     su_olcu = st.number_input("Su Ölçü (m)", min_value=0.0, value=0.0, step=0.1, key="su_m")
     su_oran_secim = st.selectbox("Su Oranı", oran_listesi, key="su_o")
-    su
+    su_aciklama = "SU ABONESİ OLAMAZ" if su_oran_secim in ["%25", "Tarım Alanı"] else ""
+    if su_aciklama: st.markdown(f"**:red[{su_aciklama}]**")
+
+with col2:
+    st.markdown("**🚽 Kanal Satırı**")
+    kanal_olcu = st.number_input("Kanal Ölçü (m)", min_value=0.0
