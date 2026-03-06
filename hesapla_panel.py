@@ -81,39 +81,4 @@ with col1:
 
 with col2:
     st.markdown("**🚽 Kanal Satırı**")
-    kanal_olcu = st.number_input("Kanal Ölçü (m)", min_value=0.0, value=0.0, step=0.1, key="ka_m")
-    kanal_oran_secim = st.selectbox("Kanal Oranı", oran_listesi, key="ka_o")
-
-st.markdown("**🔍 Keşif Bilgisi**")
-kesif_adet = st.number_input("Keşif Sayısı (Adet)", min_value=0, value=0, step=1, key="ke_a")
-
-st.markdown("**📝 Genel Notlar ve Açıklama**")
-kanal_aciklama = st.text_area("Raporun altına eklenecek detaylı not:", height=100)
-
-# --- 6. ADIM: PDF OLUŞTURMA ---
-if st.button("🚀 PDF Raporunu Oluştur"):
-    if pdf_file_content:
-        try:
-            su_satiri, su_t = satir_hazirla("Su", su_olcu, BIRIM_SU, su_oran_secim)
-            kanal_satiri, kanal_t = satir_hazirla("Kanal", kanal_olcu, BIRIM_KANAL, kanal_oran_secim)
-            kesif_t = kesif_adet * BIRIM_KESIF
-            kesif_satiri = ["Keşif", f"{kesif_adet}", f"{BIRIM_KESIF:,.2f}", "-", f"{kesif_t:,.2f} TL"]
-            genel_toplam = su_t + kanal_t + kesif_t
-
-            packet = io.BytesIO()
-            can = canvas.Canvas(packet, pagesize=A4)
-            # Maskeleme
-            can.setFillColor(colors.white); can.setStrokeColor(colors.white)
-            can.rect(420, 750, 150, 35, fill=1); can.rect(50, 420, 550, 120, fill=1)
-
-            can.setFillColor(colors.black)
-            can.setFont(FONT_NAME_BOLD, 11)
-            can.drawString(80, 245, "HESAP TABLOSU")
-
-            data = [
-                ["Tahakkuk Kalemi", "Ölçü", "Birim Fiyat", "Oran", "Tutar"],
-                su_satiri, kanal_satiri, kesif_satiri,
-                ["TOPLAM", "", "", "", f"{genel_toplam:,.2f} TL"]
-            ]
-            
-            t = Table(data, colWidths=
+    kanal_olcu = st.number_input("Kanal Ölçü (m)", min
