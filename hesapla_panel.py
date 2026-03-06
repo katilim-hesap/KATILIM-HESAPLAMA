@@ -136,23 +136,4 @@ if st.button("🚀 PDF Raporunu Oluştur"):
                 can.drawString(80, y_konum, f"* {su_aciklama}"); y_konum -= 15
             
             if kanal_aciklama:
-                can.setFont(FONT_NAME, 9); can.setFillColor(colors.black)
-                from reportlab.lib.utils import simpleSplit
-                lines = simpleSplit(kanal_aciklama, FONT_NAME, 9, 450)
-                for line in lines:
-                    can.drawString(80, y_konum, line); y_konum -= 11
-
-            can.save(); packet.seek(0)
-            new_pdf = PdfReader(packet); old_pdf = PdfReader(io.BytesIO(pdf_file_content))
-            output = PdfWriter()
-            for i in range(len(old_pdf.pages)):
-                page = old_pdf.pages[i]
-                if i == 0: page.merge_page(new_pdf.pages[0])
-                output.add_page(page)
-            
-            res_output = io.BytesIO()
-            output.write(res_output)
-            st.success("✅ Rapor Hazır!")
-            b64 = base64.b64encode(res_output.getvalue()).decode('utf-8')
-            st.markdown(f'<iframe src="data:application/pdf;base64,{b64}" width="100%" height="800" type="application/pdf"></iframe>', unsafe_allow_html=True)
-            st.download_button("📥 İndir", res_output.getvalue(), "Rapor.
+                can.setFont(FONT_NAME, 9); can.setFillColor(colors
