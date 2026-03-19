@@ -13,7 +13,7 @@ from reportlab.lib import colors
 AYAR_DOSYASI = "birim_fiyatlar.txt"
 
 def fiyatlari_yukle():
-    varsayilan = {"su": 4352.38, "kanal": 7395.14, "kesif": 2470.39, "konut": 7137.86, "konut_disi": 7137,86}
+    varsayilan = {"su": 4352.38, "kanal": 7395.14, "kesif": 2470.39, "konut": 7137.86, "konut_disi": 7137.86}
     if os.path.exists(AYAR_DOSYASI):
         try:
             with open(AYAR_DOSYASI, "r") as f:
