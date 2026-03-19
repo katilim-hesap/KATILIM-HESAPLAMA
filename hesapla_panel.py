@@ -13,7 +13,7 @@ from reportlab.lib import colors
 AYAR_DOSYASI = "birim_fiyatlar.txt"
 
 def fiyatlari_yukle():
-    varsayilan = {"su": 4352.38, "kanal": 7395.14, "kesif": 2470.39, "konut": 7395.14, "konut_disi": 7395.14}
+    varsayilan = {"su": 4352.38, "kanal": 7395.14, "kesif": 2470.39, "konut": 7137.86, "konut_disi": 7137,86}
     if os.path.exists(AYAR_DOSYASI):
         try:
             with open(AYAR_DOSYASI, "r") as f:
@@ -156,7 +156,7 @@ SEC = ["%100", "%75", "%25", "Tarim Alani", "Meskun", "Muaf", "Ucretsiz"]
 
 st.markdown("""<style>.stApp { background-color: #f0f9ff; } .top-bilgi { padding: 15px; border-radius: 10px; background-color: #0369a1; color: white; font-size: 24px; font-weight: bold; text-align: center; } .satir-tutar { color: #0369a1; font-weight: bold; margin-top: 32px; }</style>""", unsafe_allow_html=True)
 
-st.title("🏛️ Belediye Hesaplama Sistemi")
+st.title("🏛️ İZSU Katılım Bedelleri Hesaplama Sistemi")
 mod = st.sidebar.radio("📌 Menü", ["💰 Katılım Bedeli", "📋 Proje İnceleme Ücreti"])
 
 if mod == "💰 Katılım Bedeli":
