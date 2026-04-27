@@ -8,6 +8,7 @@ from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
+from reportlab.lib.utils import simpleSplit # Alt satıra geçiş için gerekli
 
 # --- 0. AYARLAR VE VERI YONETIMI ---
 AYAR_DOSYASI = "birim_fiyatlar.txt"
@@ -99,29 +100,24 @@ def pdf_islemek(eski_pdf, tablo, g_top, su_ok, genel_not, su_detay="", kanal_det
                 can.setFont("Helvetica-Bold", 10)
                 can.drawRightString(535, y_pos, f"TOPLAM: {g_top:,.2f} TL")
                 
-                # --- YENI EKLEME: DINAMIK NOTLAR VE CEPHE HESAPLARI ---
+                # --- YENI: DINAMIK VE COK SATIRLI NOTLAR ---
                 y_pos -= 20
-                can.setFont("Helvetica-Bold", 7)
                 
-                if genel_not:
-                    can.drawString(50, y_pos, "Aciklama:")
-                    can.setFont("Helvetica", 7)
-                    can.drawString(110, y_pos, tr_duzelt(genel_not))
-                    y_pos -= 10
-                
-                if su_detay:
+                def metin_ekle_ve_kaydir(baslik, metin, curr_y):
+                    if not metin: return curr_y
                     can.setFont("Helvetica-Bold", 7)
-                    can.drawString(50, y_pos, "Su Cephe:")
+                    can.drawString(50, curr_y, baslik)
                     can.setFont("Helvetica", 7)
-                    can.drawString(110, y_pos, tr_duzelt(su_detay))
-                    y_pos -= 10
+                    # 430 birim genişliğe göre metni böler
+                    satirlar = simpleSplit(tr_duzelt(metin), "Helvetica", 7, 430)
+                    for satir in satirlar:
+                        can.drawString(110, curr_y, satir)
+                        curr_y -= 9 # Satır aralığı
+                    return curr_y - 2
 
-                if kanal_detay:
-                    can.setFont("Helvetica-Bold", 7)
-                    can.drawString(50, y_pos, "Kanal Cephe:")
-                    can.setFont("Helvetica", 7)
-                    can.drawString(110, y_pos, tr_duzelt(kanal_detay))
-                    y_pos -= 10
+                y_pos = metin_ekle_ve_kaydir("Aciklama:", genel_not, y_pos)
+                y_pos = metin_ekle_ve_kaydir("Su Cephe:", su_detay, y_pos)
+                y_pos = metin_ekle_ve_kaydir("Kanal Cephe:", kanal_detay, y_pos)
                 
                 y_final = 105
                 can.setFont("Helvetica", 8)
@@ -179,7 +175,6 @@ if mod == "💰 Katılım Bedeli":
     
     st.divider()
     st.subheader("📝 Rapor Detayları")
-    # YAZDIKÇA GENİŞLEYEN ALANLAR
     g_not = st.text_area("Genel Not / Açıklama", height=80, placeholder="Raporun en altında görünecek ana not...")
     cd1, cd2 = st.columns(2)
     s_detay = cd1.text_area("Su Cephe Hesabı Detayı", height=68, placeholder="Örn: 20m + 15m / 2...")
